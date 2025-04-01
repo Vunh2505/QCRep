@@ -1,0 +1,1 @@
+✅ TC013 Passed - All expected fields are visible.

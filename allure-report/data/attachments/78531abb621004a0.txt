@@ -1,0 +1,127 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: TC010 - Kiểm tra tìm kiếm giấy phép trên TRANG MẠNG XÃ HỘI
+- Location: /Users/nguyenhuyvu/working/ABEI/tests/test_09_12.spec.ts:31:7
+
+# Error details
+
+```
+Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+Locator: locator('.section-search').locator('input[placeholder="Tên đơn vị chủ quản"]')
+Expected: visible
+Received: <element(s) not found>
+Call log:
+  - expect.toBeVisible with timeout 5000ms
+  - waiting for locator('.section-search').locator('input[placeholder="Tên đơn vị chủ quản"]')
+
+    at /Users/nguyenhuyvu/working/ABEI/tests/test_09_12.spec.ts:50:29
+```
+
+# Page snapshot
+
+```yaml
+- link "CỤC PHÁT THANH, TRUYỀN HÌNH VÀ THÔNG TIN ĐIỆN TỬ":
+  - paragraph: CỤC PHÁT THANH, TRUYỀN HÌNH
+  - paragraph: VÀ THÔNG TIN ĐIỆN TỬ
+- navigation:
+  - list:
+    - listitem:
+      - link "TRANG CHỦ"
+    - listitem: ">"
+    - listitem:
+      - link "TRANG MẠNG XÃ HỘI"
+- heading "TRANG MẠNG XÃ HỘI" [level=1]
+- textbox "Tên doanh nghiệp"
+- textbox "Website(tên miền trang)"
+- textbox "Số giấy phép"
+- combobox
+- text: Tất cả
+- button "Làm mới"
+- button "Tìm kiếm"
+- img "No data"
+- text: Không Không tìm thấy dữ liệu
+- contentinfo:
+  - paragraph: Giấy phép thiết lập trang thông tin điện tử tổng hợp trên mạng.
+  - paragraph: Số 147/GP-TTĐT ngày 12/08/2019
+  - paragraph: Copyright © - Cục phát thanh, truyền hình và thông tin điện tử. All Rights Rerved
+- alert
+```
+
+# Test source
+
+```ts
+   1 | import { test, expect } from '@playwright/test';
+   2 |
+   3 | const searchTests = [
+   4 |   {
+   5 |     id: 'TC009',
+   6 |     url: 'https://giayphep.game.gov.vn/vi/information',
+   7 |     title: 'TRANG ĐIỆN TỬ TỔNG HỢP',
+   8 |     searchFields: ['Website (tên miền trang)', 'Tên doanh nghiệp', 'Số giấy phép']
+   9 |   },
+  10 |   {
+  11 |     id: 'TC010',
+  12 |     url: 'https://giayphep.game.gov.vn/vi/social',
+  13 |     title: 'TRANG MẠNG XÃ HỘI',
+  14 |     searchFields: ['Website (tên miền trang)', 'Tên đơn vị chủ quản', 'Số giấy phép']
+  15 |   },
+  16 |   {
+  17 |     id: 'TC011',
+  18 |     url: 'https://giayphep.game.gov.vn/vi/game-g1',
+  19 |     title: 'TRANG TRÒ CHƠI ĐIỆN TỬ G1',
+  20 |     searchFields: ['Website (tên miền trang)', 'Tên trò chơi', 'Tên đơn vị chủ quản', 'Số quyết định']
+  21 |   },
+  22 |   {
+  23 |     id: 'TC012',
+  24 |     url: 'https://giayphep.game.gov.vn/vi/game-g234',
+  25 |     title: 'TRANG TRÒ CHƠI ĐIỆN TỬ G2,3,4',
+  26 |     searchFields: ['Website (tên miền trang)', 'Tên trò chơi', 'Tên đơn vị chủ quản', 'Số giấy phép']
+  27 |   }
+  28 | ];
+  29 |
+  30 | searchTests.forEach(({ id, url, title, searchFields }) => {
+  31 |   test(`${id} - Kiểm tra tìm kiếm giấy phép trên ${title}`, async ({ page }) => {
+  32 |     await page.goto(url);
+  33 |
+  34 |     // Kiểm tra tiêu đề trang
+  35 |     //const pageTitle = await page.locator('h1.header-app').textContent();
+  36 |     //expect(pageTitle?.trim()).toBe(title);
+  37 |     await expect(page.locator('h1.header-app')).toHaveText(new RegExp(title, 'i'));
+  38 |
+  39 |
+  40 |     // Kiểm tra cụm tìm kiếm có đủ các trường nhập
+  41 |     const searchSection = page.locator('.section-search');
+  42 |     await expect(searchSection).toBeVisible();
+  43 |
+  44 |     for (const field of searchFields) {
+  45 |       if (field === 'Website (tên miền trang)') {
+  46 |         const input = searchSection.locator(`input[placeholder*="Website"]`);
+  47 |         await expect(input).toBeVisible();
+  48 |       } else {
+  49 |         const input = searchSection.locator(`input[placeholder="${field}"]`);
+> 50 |         await expect(input).toBeVisible();
+     |                             ^ Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+  51 |       }
+  52 |     }
+  53 |
+  54 |     // Kiểm tra nút tìm kiếm hoạt động
+  55 |     const searchButton = searchSection.locator('button:has-text("Tìm kiếm")');
+  56 |     await expect(searchButton).toBeVisible();
+  57 |     await searchButton.click();
+  58 |
+  59 |     // Kiểm tra kết quả hiển thị
+  60 |     //const resultList = page.locator('.license-list');
+  61 |     //await expect(resultList).toBeVisible();
+  62 |
+  63 |     console.log(`✅ ${id} Passed - Tìm kiếm hoạt động đúng trên trang ${title}`);
+  64 |   });
+  65 | });
+  66 |
+```

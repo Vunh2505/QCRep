@@ -1,0 +1,6 @@
+🔍 Số nhóm giấy phép tìm thấy: 4
+✅ Nhóm giấy phép 1: TRANG THÔNG TIN ĐIỆN TỬ TỔNG HỢP
+✅ Nhóm giấy phép 2: MẠNG XÃ HỘI
+✅ Nhóm giấy phép 3: TRÒ CHƠI ĐIỆN TỬ G1
+✅ Nhóm giấy phép 4: TRÒ CHƠI ĐIỆN TỬ G2,G3,G4
+✅ TC001 Passed - Title đúng và các nhóm giấy phép hiển thị chính xác!

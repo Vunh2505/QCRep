@@ -1,0 +1,161 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: Kiểm tra hệ thống giấy phép game >> TC007 - Kiểm tra trang Trò chơi điện tử G1
+- Location: /Users/nguyenhuyvu/working/ABEI/tests/test_01_08.spec.ts:78:7
+
+# Error details
+
+```
+Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+Locator: locator('.license-list')
+Expected: visible
+Received: <element(s) not found>
+Call log:
+  - expect.toBeVisible with timeout 5000ms
+  - waiting for locator('.license-list')
+
+    at /Users/nguyenhuyvu/working/ABEI/tests/test_01_08.spec.ts:80:49
+```
+
+# Page snapshot
+
+```yaml
+- link "CỤC PHÁT THANH, TRUYỀN HÌNH VÀ THÔNG TIN ĐIỆN TỬ":
+  - paragraph: CỤC PHÁT THANH, TRUYỀN HÌNH
+  - paragraph: VÀ THÔNG TIN ĐIỆN TỬ
+- navigation:
+  - list:
+    - listitem:
+      - link "TRANG CHỦ"
+    - listitem: ">"
+    - listitem:
+      - link "TRANG TRÒ CHƠI ĐIỆN TỬ G1"
+- heading "TRANG TRÒ CHƠI ĐIỆN TỬ G1" [level=1]
+- textbox "Tên doanh nghiệp"
+- textbox "Tên trò chơi"
+- textbox "Website (tên miền trang)"
+- textbox "Số quyết định"
+- combobox
+- text: Tất cả
+- button "Làm mới"
+- button "Tìm kiếm"
+- img "No data"
+- text: Không Không tìm thấy dữ liệu
+- contentinfo:
+  - paragraph: Giấy phép thiết lập trang thông tin điện tử tổng hợp trên mạng.
+  - paragraph: Số 147/GP-TTĐT ngày 12/08/2019
+  - paragraph: Copyright © - Cục phát thanh, truyền hình và thông tin điện tử. All Rights Rerved
+- alert
+```
+
+# Test source
+
+```ts
+   1 | import { test, expect } from '@playwright/test';
+   2 |
+   3 | test.describe('Kiểm tra hệ thống giấy phép game', () => {
+   4 |
+   5 |   test('TC001 - Kiểm tra truy cập URL', async ({ page }) => {
+   6 |     await page.goto('https://giayphep.game.gov.vn/vi');
+   7 |     expect(await page.isVisible('body')).toBeTruthy();
+   8 |   });
+   9 |
+  10 |   test('TC002 - Kiểm tra title ABEI', async ({ page }) => {
+  11 |     await page.goto('https://giayphep.game.gov.vn/vi');
+  12 |     const pageTitle = await page.title();
+  13 |     expect(pageTitle).toBe('ABEI');
+  14 |   });
+  15 |
+  16 |   test('TC003 - Kiểm tra 4 nhóm giấy phép', async ({ page }) => {
+  17 |     await page.goto('https://giayphep.game.gov.vn/vi');
+  18 |     const licenseGroups = await page.locator('div.flex.items-center.border-l-4.border-blue-500.bg-white.px-4.mb-2 > h1');
+  19 |     expect(await licenseGroups.count()).toBe(4);
+  20 |     const expectedGroups = [
+  21 |       "TRANG THÔNG TIN ĐIỆN TỬ TỔNG HỢP",
+  22 |       "MẠNG XÃ HỘI",
+  23 |       "TRÒ CHƠI ĐIỆN TỬ G1",
+  24 |       "TRÒ CHƠI ĐIỆN TỬ G2,G3,G4"
+  25 |     ];
+  26 |     for (let i = 0; i < 4; i++) {
+  27 |       expect(await licenseGroups.nth(i).textContent()).toBe(expectedGroups[i]);
+  28 |     }
+  29 |   });
+  30 |
+  31 |   test('TC004 - Kiểm tra số lượng giấy phép trong mỗi nhóm', async ({ page }) => {
+  32 |     await page.goto('https://giayphep.game.gov.vn/vi');
+  33 |
+  34 |     // Lấy danh sách các nhóm giấy phép
+  35 |     const licenseGroups = await page.locator('div.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-4.gap-4.item-home.p-4');
+  36 |
+  37 |     // Kiểm tra có đúng 4 nhóm giấy phép
+  38 |     const groupCount = await licenseGroups.count();
+  39 |     console.log(`🔍 Số nhóm giấy phép tìm thấy: ${groupCount}`); // Debugging
+  40 |     expect(groupCount).toBe(4);
+  41 |
+  42 |     // Kiểm tra mỗi nhóm không có quá 8 giấy phép
+  43 |     for (let i = 0; i < groupCount; i++) {
+  44 |       const group = licenseGroups.nth(i);
+  45 |       const licenses = await group.locator('div.border.rounded-lg.shadow').count();
+  46 |
+  47 |       console.log(`📌 Nhóm ${i + 1} có ${licenses} giấy phép`);
+  48 |       expect(licenses).toBeLessThanOrEqual(8);
+  49 |     }
+  50 |
+  51 |     // Chụp ảnh màn hình để kiểm tra trực quan
+  52 |     await page.screenshot({ path: `screenshots/TC004_group_cards.png`, fullPage: true });
+  53 |
+  54 |     console.log("✅ TC004 Passed - Mỗi nhóm không có quá 8 giấy phép!");
+  55 |   });
+  56 |
+  57 |   // Kiểm tra từng trang nhóm giấy phép
+  58 |   test('TC005 - Kiểm tra trang Thông tin điện tử tổng hợp', async ({ page }) => {
+  59 |     await page.goto('https://giayphep.game.gov.vn/vi/information');
+  60 |     await expect(page.locator('.license-list')).toBeVisible();
+  61 |
+  62 |     // Kiểm tra giấy phép sắp xếp theo thời gian cấp gần nhất
+  63 |     const licenses = await page.locator('.license-item .date-issued').allTextContents();
+  64 |     const sortedDates = [...licenses].sort().reverse();
+  65 |     expect(licenses).toEqual(sortedDates);
+  66 |   });
+  67 |
+  68 |   test('TC006 - Kiểm tra trang Mạng Xã Hội', async ({ page }) => {
+  69 |     await page.goto('https://giayphep.game.gov.vn/vi/social');
+  70 |     await expect(page.locator('.license-list')).toBeVisible();
+  71 |
+  72 |     // Kiểm tra giấy phép sắp xếp theo thời gian cấp gần nhất
+  73 |     const licenses = await page.locator('.license-item .date-issued').allTextContents();
+  74 |     const sortedDates = [...licenses].sort().reverse();
+  75 |     expect(licenses).toEqual(sortedDates);
+  76 |   });
+  77 |
+  78 |   test('TC007 - Kiểm tra trang Trò chơi điện tử G1', async ({ page }) => {
+  79 |     await page.goto('https://giayphep.game.gov.vn/vi/game-g1');
+> 80 |     await expect(page.locator('.license-list')).toBeVisible();
+     |                                                 ^ Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+  81 |
+  82 |     // Kiểm tra giấy phép sắp xếp theo thời gian cấp gần nhất
+  83 |     const licenses = await page.locator('.license-item .date-issued').allTextContents();
+  84 |     const sortedDates = [...licenses].sort().reverse();
+  85 |     expect(licenses).toEqual(sortedDates);
+  86 |   });
+  87 |
+  88 |   test('TC008 - Kiểm tra trang Trò chơi điện tử G2,G3,G4', async ({ page }) => {
+  89 |     await page.goto('https://giayphep.game.gov.vn/vi/game-g234');
+  90 |     await expect(page.locator('.license-list')).toBeVisible();
+  91 |
+  92 |     // Kiểm tra giấy phép sắp xếp theo thời gian cấp gần nhất
+  93 |     const licenses = await page.locator('.license-item .date-issued').allTextContents();
+  94 |     const sortedDates = [...licenses].sort().reverse();
+  95 |     expect(licenses).toEqual(sortedDates);
+  96 |   });
+  97 |
+  98 | });
+  99 |
+```

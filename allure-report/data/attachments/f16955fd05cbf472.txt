@@ -1,0 +1,6 @@
+🔍 Số nhóm giấy phép tìm thấy: 4
+📌 Nhóm 1 có 8 giấy phép
+📌 Nhóm 2 có 8 giấy phép
+📌 Nhóm 3 có 8 giấy phép
+📌 Nhóm 4 có 8 giấy phép
+✅ TC004 Passed - Mỗi nhóm không có quá 8 giấy phép!
